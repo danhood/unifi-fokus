@@ -1,3 +1,5 @@
+ #!/usr/bin/env python
+
 from unifi.controller import Controller
 import time
 import datetime
@@ -68,13 +70,13 @@ users = c.get_users()
 clients = c.get_clients()
 log = []
 
-storedtimestamp = timestamp if (args.getall) else get_last_timestamp();
-storedtimestamp = storedtimestamp.replace(tzinfo=local_tz)
+storedtimestamp = get_last_timestamp().replace(tzinfo=local_tz);
+# storedtimestamp = storedtimestamp
 
 for event in c.get_events():
     timestamp = utc_to_local(datetime.datetime.strptime(event['datetime'], "%Y-%m-%dT%H:%M:%SZ"))
-    logprefix = "%s unifi" % (timestamp.strftime("%Y-%m-%d %H:%M:%S"))
-    if timestamp >= (storedtimestamp):
+    logprefix = "%s unifi" % (timestamp.strftime("%b %d %H:%M:%S"))
+    if timestamp >= ( timestamp if (args.getall) else storedtimestamp):
         # Cheeck if event is not an AP Connect/Disconnect Event and collect
         # user data (AP Events don't have a user key in data.)
         if event.has_key('user'):
@@ -88,7 +90,7 @@ for event in c.get_events():
                         ip = ''
                         if event['user'] == client['mac']:
 
-                            ip = "Client-IP = %s" % (client['ip']) if (client.has_key('ip')) else '';
+                            ip = " Client-IP = %s" % (client['ip']) if (client.has_key('ip')) else '';
             clientmac = "Client-MAC = %s," % (event['user'])
 
         if event['key'] == "EVT_WU_Roam":
@@ -98,12 +100,12 @@ for event in c.get_events():
             from_channel = "from-channel = %s" % (event['channel_from'])
             to_channel = "to-channel = %s" % (event['channel_to'])
 
-            log.append("%s %s %s %s %s %s %s %s" % (logprefix, clienthost, clientmac, ip, from_ap, from_channel, to_ap,  to_channel))
+            log.append("%s %s %s%s %s %s %s %s" % (logprefix, clienthost, clientmac, ip, from_ap, from_channel, to_ap,  to_channel))
         elif event['key'] == "EVT_WU_RoamRadio":
             ap_name = "at-AP = %s" % (get_ap_hostname(event['ap']))
-            from_channel = "from-channel = %s" % (event['channel_from'])
+            from_channel = "roams from-channel = %s" % (event['channel_from'])
             to_channel = "to-channel = %s" % (event['channel_to'])
-            log.append("%s %s %s %s %s %s %s" % (logprefix, clienthost, clientmac, ip, ap_name, from_channel, to_channel))
+            log.append("%s %s %s%s %s %s %s" % (logprefix, clienthost, clientmac, ip, ap_name, from_channel, to_channel))
         elif event['key'] == "EVT_AP_Connected":
             ap_name = event['ap_name']
             ap_mac = event['ap']
@@ -116,13 +118,15 @@ for event in c.get_events():
             ap_name = "at-AP = %s," % (get_ap_hostname(event['ap']))
             ssid = "has connected to SSID = %s," % (event['ssid'])
             channel = "to-channel = %s" % (event['channel'])
-            log.append("%s %s %s %s %s %s %s" % (logprefix, clienthost, clientmac, ip, ssid, ap_name, channel))
+            log.append("%s %s %s%s %s %s %s" % (logprefix, clienthost, clientmac, ip, ssid, ap_name, channel))
         elif event['key'] == "EVT_WU_Disconnected":
             ap_name = "from-AP = %s," % (get_ap_hostname(event['ap']))
             ssid = "has disconnected from SSID = %s," % (event['ssid'])
             duration = "Usage: duration = %s," % (duration_time_format(event['duration']))
             totalbytes = "volume = %s" % convertSize(event['bytes'])
-            log.append("%s %s %s %s %s %s %s" %(logprefix, clienthost, clientmac, ip, ssid, duration, totalbytes))
+            log.append("%s %s %s%s %s %s %s" %(logprefix, clienthost, clientmac, ip, ssid, duration, totalbytes))
+        else:
+            log.append("%s MSG %s %s" % logprefix, event['key'], event['msg'])
 
 # if logdata is generated, sort it and prepare it for logfile storage
 # Then update Timestamps in unifitimestamp.cfg file.
