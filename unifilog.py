@@ -35,8 +35,10 @@ def get_ap_hostname(mac):
 
 def duration_time_format(seconds):
     delay = datetime.timedelta(seconds= seconds)
-    if (delay.days > 0):
+    if (delay.days >= 2):
         out = str(delay).replace(" days, ", ":")
+    elif (delay.days == 1)
+        out = str(delay).replace(" day, ", ":")
     else:
         out = "0:" + str(delay)
     outAr = out.split(':')
