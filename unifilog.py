@@ -18,16 +18,15 @@ parser.add_argument("-a", "--getall", help="fetches the complete event data from
 args = parser.parse_args()
 
 def utc_to_local(utc_dt):
-
     local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
     return local_dt
 
-def convertSize(num, suffix='B'):
-    for unit in ['','K','M','G','T','P','E','Z']:
-        if abs(num) < 1024.0:
-            return "%3.1f%s%s" % (num, unit, suffix)
-        num /= 1024.0
-    return "%.1f%s%s" % (num, 'Y', suffix)
+# def convertSize(num, suffix='B'):
+#     for unit in ['','K','M','G','T','P','E','Z']:
+#         if abs(num) < 1024.0:
+#             return "%3.1f%s%s" % (num, unit, suffix)
+#         num /= 1024.0
+#     return "%.1f%s%s" % (num, 'Y', suffix)
 
 def get_ap_hostname(mac):
     for ap in aps:
@@ -83,50 +82,55 @@ for event in c.get_events():
             for user in users:
                 if event['user'] == user['mac']:
                     if user.has_key('hostname'):
-                        clienthost = "Client-host = %s, " % (user['hostname'])
+                        clienthost = "Client_host = %s, " % (user['hostname'])
                     else:
                         clienthost = ''
                     for client in clients:
                         ip = ''
                         if event['user'] == client['mac']:
 
-                            ip = "Client-IP = %s " % (client['ip']) if (client.has_key('ip')) else '';
-            clientmac = "Client-MAC = %s, " % (event['user'])
+                            ip = "Client_IP = %s " % (client['ip']) if (client.has_key('ip')) else '';
+            clientmac = "Client_MAC = %s, " % (event['user'])
 
         if event['key'] == "EVT_WU_Roam":
-            from_ap = "roams from-AP = %s, " % (get_ap_hostname(event['ap_from']))
-            to_ap = "to-AP = %s, " % (get_ap_hostname(event['ap_to']))
+            from_ap = "roams from_AP = %s, " % (get_ap_hostname(event['ap_from']))
+            to_ap = "to_AP = %s, " % (get_ap_hostname(event['ap_to']))
 
-            from_channel = "from-channel = %s " % (event['channel_from'])
-            to_channel = "to-channel = %s" % (event['channel_to'])
+            from_channel = "from_channel = %s " % (event['channel_from'])
+            to_channel = "to_channel = %s" % (event['channel_to'])
 
             log.append("%s%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, from_ap, from_channel, to_ap,  to_channel))
         elif event['key'] == "EVT_WU_RoamRadio":
-            ap_name = "at-AP = %s " % (get_ap_hostname(event['ap']))
-            from_channel = "roams from-channel = %s " % (event['channel_from'])
-            to_channel = "to-channel = %s" % (event['channel_to'])
+            ap_name = "at_AP = %s " % (get_ap_hostname(event['ap']))
+            from_channel = "roams from_channel = %s " % (event['channel_from'])
+            to_channel = "to_channel = %s" % (event['channel_to'])
             log.append("%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, ap_name, from_channel, to_channel))
         elif event['key'] == "EVT_AP_Connected":
             ap_name = event['ap_name']
             ap_mac = event['ap']
-            log.append("%s AP %s (%s) was connected" % (logprefix, ap_name, ap_mac))
+            log.append("%sAP %s (%s) was connected" % (logprefix, ap_name, ap_mac))
         elif event['key'] == "EVT_AP_Disconnected":
             ap_name = event['ap_name']
             ap_mac = event['ap']
-            log.append("%s AP %s (%s) was disconnected" % (logprefix, ap_name, ap_mac))
+            log.append("%sAP %s (%s) was disconnected" % (logprefix, ap_name, ap_mac))
         elif event['key'] == "EVT_WU_Connected":
             ap_name = "at-AP = %s, " % (get_ap_hostname(event['ap']))
             ssid = "has connected to SSID = %s, " % (event['ssid'])
-            channel = "to-channel = %s" % (event['channel'])
+            channel = "to_channel = %s" % (event['channel'])
             log.append("%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, ssid, ap_name, channel))
         elif event['key'] == "EVT_WU_Disconnected":
             ap_name = "from-AP = %s, " % (get_ap_hostname(event['ap']))
             ssid = "has disconnected from SSID = %s, " % (event['ssid'])
             duration = "Usage: duration = %s, " % (duration_time_format(event['duration']))
-            totalbytes = "volume = %s" % convertSize(event['bytes'])
+            totalbytes = "volume = %s" % event['bytes']
             log.append("%s%s%s%s%s%s%s" %(logprefix, clienthost, clientmac, ip, ssid, duration, totalbytes))
+        elif event['key'] == "EVT_AP_Restarted":
+            ap_name = event['ap_name']
+            ap_mac = event['ap']
+            admin = event['admin']
+            log.append("%sAP %s (%s) was restarted by %s" % (logprefix, ap_name, ap_mac, admin))
         else:
-            log.append("%s MSG %s %s" % logprefix, event['key'], event['msg'])
+            log.append("%s MSG %s %s" % (logprefix, event['key'], event['msg']))
 
 # if logdata is generated, sort it and prepare it for logfile storage
 # Then update Timestamps in unifitimestamp.cfg file.
