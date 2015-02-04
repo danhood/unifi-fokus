@@ -37,7 +37,7 @@ def duration_time_format(seconds):
     delay = datetime.timedelta(seconds= seconds)
     if (delay.days >= 2):
         out = str(delay).replace(" days, ", ":")
-    elif (delay.days == 1)
+    elif (delay.days == 1):
         out = str(delay).replace(" day, ", ":")
     else:
         out = "0:" + str(delay)
