@@ -5,28 +5,16 @@ import time
 import datetime
 import math
 import argparse
-import pytz
+# import pytz
 
-local_tz = pytz.timezone('Europe/Berlin')
+# local_tz = pytz.timezone('Europe/Berlin')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--controller", help="specifies host of the controller")
 parser.add_argument("-u", "--user", help="specifies username for controller access")
 parser.add_argument("-p", "--password", help="specifies password for controller access")
-parser.add_argument("-a", "--getall", help="fetches the complete event data from controller", action="store_true")
 
 args = parser.parse_args()
-
-def utc_to_local(utc_dt):
-    local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
-    return local_dt
-
-# def convertSize(num, suffix='B'):
-#     for unit in ['','K','M','G','T','P','E','Z']:
-#         if abs(num) < 1024.0:
-#             return "%3.1f%s%s" % (num, unit, suffix)
-#         num /= 1024.0
-#     return "%.1f%s%s" % (num, 'Y', suffix)
 
 def get_ap_hostname(mac):
     for ap in aps:
@@ -37,7 +25,7 @@ def duration_time_format(seconds):
     delay = datetime.timedelta(seconds= seconds)
     if (delay.days >= 2):
         out = str(delay).replace(" days, ", ":")
-    elif (delay.days == 1)
+    elif (delay.days == 1):
         out = str(delay).replace(" day, ", ":")
     else:
         out = "0:" + str(delay)
@@ -56,28 +44,31 @@ def get_last_timestamp():
         with open ('unifitimestamp.cfg', 'r+') as file:
             timestamp = file.readline()
             if timestamp:
-                return datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f\n")
+                return int(timestamp)
     except:
-        return datetime.datetime.now() - datetime.timedelta(minutes= 10)
+        return 0
 
-
-def set_timestamp():
+def set_timestamp(timestamp):
     with open ('unifitimestamp.cfg', 'w') as file:
-        file.write('%s\n' % str(datetime.datetime.now()))
+        file.write('%s\n' % str(timestamp))
+
+def unixtimestamp_to_datetime(timestamp):
+    mytime = datetime.datetime.fromtimestamp(timestamp/1000)
+    mytime.replace(microsecond = (timestamp % 1000) * 1000)
+    return mytime
 
 c = Controller(args.controller, args.user, args.password)
 aps = c.get_aps()
 users = c.get_users()
 clients = c.get_clients()
-log = []
 
-storedtimestamp = get_last_timestamp().replace(tzinfo=local_tz);
-# storedtimestamp = storedtimestamp
-
+storedtimestamp = unixtimestamp_to_datetime(get_last_timestamp())
+message = {}
 for event in c.get_events():
-    timestamp = utc_to_local(datetime.datetime.strptime(event['datetime'], "%Y-%m-%dT%H:%M:%SZ"))
+
+    timestamp = unixtimestamp_to_datetime(event['time'])
     logprefix = "%s unifi " % (timestamp.strftime("%b %d %H:%M:%S"))
-    if timestamp >= ( timestamp if (args.getall) else storedtimestamp):
+    if (timestamp > storedtimestamp) or (storedtimestamp == 0):
         # Cheeck if event is not an AP Connect/Disconnect Event and collect
         # user data (AP Events don't have a user key in data.)
         if event.has_key('user'):
@@ -100,44 +91,44 @@ for event in c.get_events():
 
             from_channel = "from_channel = %s " % (event['channel_from'])
             to_channel = "to_channel = %s" % (event['channel_to'])
-
-            log.append("%s%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, from_ap, from_channel, to_ap,  to_channel))
+            message[event['time']] = "%s%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, from_ap, from_channel, to_ap,  to_channel)
         elif event['key'] == "EVT_WU_RoamRadio":
             ap_name = "at_AP = %s " % (get_ap_hostname(event['ap']))
             from_channel = "roams from_channel = %s " % (event['channel_from'])
             to_channel = "to_channel = %s" % (event['channel_to'])
-            log.append("%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, ap_name, from_channel, to_channel))
+            message[event['time']] = "%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, ap_name, from_channel, to_channel)
         elif event['key'] == "EVT_AP_Connected":
             ap_name = event['ap_name']
             ap_mac = event['ap']
-            log.append("%sAP %s (%s) was connected" % (logprefix, ap_name, ap_mac))
+            message[event['time']] = "%sAP %s (%s) was connected" % (logprefix, ap_name, ap_mac)
         elif event['key'] == "EVT_AP_Disconnected":
             ap_name = event['ap_name']
             ap_mac = event['ap']
-            log.append("%sAP %s (%s) was disconnected" % (logprefix, ap_name, ap_mac))
+            message[event['time']] = "%sAP %s (%s) was disconnected" % (logprefix, ap_name, ap_mac)
         elif event['key'] == "EVT_WU_Connected":
             ap_name = "at-AP = %s, " % (get_ap_hostname(event['ap']))
             ssid = "has connected to SSID = %s, " % (event['ssid'])
             channel = "to_channel = %s" % (event['channel'])
-            log.append("%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, ssid, ap_name, channel))
+            message[event['time']] = "%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, ssid, ap_name, channel)
         elif event['key'] == "EVT_WU_Disconnected":
             ap_name = "from-AP = %s, " % (get_ap_hostname(event['ap']))
             ssid = "has disconnected from SSID = %s, " % (event['ssid'])
             duration = "Usage: duration = %s, " % (duration_time_format(event['duration']))
             totalbytes = "volume = %s" % event['bytes']
-            log.append("%s%s%s%s%s%s%s" %(logprefix, clienthost, clientmac, ip, ssid, duration, totalbytes))
+            message[event['time']] = "%s%s%s%s%s%s%s" %(logprefix, clienthost, clientmac, ip, ssid, duration, totalbytes)
         elif event['key'] == "EVT_AP_Restarted":
-            ap_name = event['ap_name']
+            ap_name = event['ap_name'] if (event.has_key('ap_name')) else '';
             ap_mac = event['ap']
             admin = event['admin']
-            log.append("%sAP %s (%s) was restarted by %s" % (logprefix, ap_name, ap_mac, admin))
+            message[event['time']] = "%sAP %s (%s) was restarted by %s" % (logprefix, ap_name, ap_mac, admin)
         else:
-            log.append("%s MSG %s %s" % (logprefix, event['key'], event['msg']))
+            message[event['time']] = "%s MSG %s %s" % (logprefix, event['key'], event['msg'])
 
 # if logdata is generated, sort it and prepare it for logfile storage
 # Then update Timestamps in unifitimestamp.cfg file.
-if log:
-    log.sort(key=lambda x: datetime.datetime.strptime(str.join(' ', x.split(None)[0:3]), "%b %d %H:%M:%S"))
-    logdata = '\n'.join(log)
+if message:
+    # message.sort()
+    logdata = '\n'.join(sorted(message.values()))
     write_to_logfile(logdata)
-    set_timestamp()
+    maxkey = max(message.keys(), key=int)
+    set_timestamp(maxkey)
