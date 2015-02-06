@@ -132,3 +132,12 @@ if message:
     write_to_logfile(logdata)
     maxkey = max(message.keys(), key=int)
     set_timestamp(maxkey)
+
+#
+# get some statistics...
+logprefix = "%s unifi" % (time.strftime("%b %d %H:%M:%S"))
+for stats in c.get_statistics_last1h(time.time()):
+    if stats.has_key('num_sta'):
+        logdata = "%s statistics: Stations_connected = %s, Traffic = %s, tx_Packets = %s, tx_Bytes = %s, tx_Errors = %s, tx_Retries= %s, rx_Packets = %s, rx_Bytes = %s, rx_Frags = %s" % (logprefix, stats['num_sta'], stats['bytes'], stats['tx_packets'], stats['tx_bytes'], stats['tx_errors'], stats['tx_retries'], stats['rx_packets'], stats['rx_bytes'], stats['rx_frags'])
+        write_to_logfile(logdata)
+	break
