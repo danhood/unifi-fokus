@@ -10,10 +10,11 @@ import argparse
 # local_tz = pytz.timezone('Europe/Berlin')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--controller", help="specifies host of the controller")
-parser.add_argument("-u", "--user", help="specifies username for controller access")
-parser.add_argument("-p", "--password", help="specifies password for controller access")
-
+parser.add_argument("-c", "--controller", help="host of the UniFi-controller (unifi)", default="unifi")
+parser.add_argument("-u", "--user", help="username for controller access (ubnt)", default="ubnt")
+parser.add_argument("-p", "--password", help="password for controller access (ubnt)", default="ubnt")
+parser.add_argument("-f", "--file", help="output file for log messages (unifi.log)", default="unifi.log")
+parser.add_argument("-t", "--timestamp", help="timestamp file (unifitimestamp.cfg)", default="unifitimestamp.cfg")
 args = parser.parse_args()
 
 def get_ap_hostname(mac):
@@ -35,13 +36,13 @@ def duration_time_format(seconds):
     return out
 
 def write_to_logfile(data):
-    with open ('unifi.log', 'a') as file:
+    with open (args.file, 'a') as file:
         file.write(data)
         file.write('\n')
 
 def get_last_timestamp():
     try:
-        with open ('unifitimestamp.cfg', 'r+') as file:
+        with open (args.timestamp, 'r+') as file:
             timestamp = file.readline()
             if timestamp:
                 return int(timestamp)
@@ -49,7 +50,7 @@ def get_last_timestamp():
         return 0
 
 def set_timestamp(timestamp):
-    with open ('unifitimestamp.cfg', 'w') as file:
+    with open (args.timestamp, 'w') as file:
         file.write('%s\n' % str(timestamp))
 
 def unixtimestamp_to_datetime(timestamp):
@@ -57,7 +58,8 @@ def unixtimestamp_to_datetime(timestamp):
     mytime.replace(microsecond = (timestamp % 1000) * 1000)
     return mytime
 
-c = Controller(args.controller, args.user, args.password)
+chost = args.controller
+c = Controller(chost, args.user, args.password)
 aps = c.get_aps()
 users = c.get_users()
 clients = c.get_clients()
@@ -67,7 +69,7 @@ message = {}
 for event in c.get_events():
 
     timestamp = unixtimestamp_to_datetime(event['time'])
-    logprefix = "%s unifi " % (timestamp.strftime("%b %d %H:%M:%S"))
+    logprefix = "%s %s " % (timestamp.strftime("%b %d %H:%M:%S"), chost)
     if (timestamp > storedtimestamp) or (storedtimestamp == 0):
         # Cheeck if event is not an AP Connect/Disconnect Event and collect
         # user data (AP Events don't have a user key in data.)
@@ -117,7 +119,7 @@ for event in c.get_events():
             totalbytes = "volume = %s" % event['bytes']
             message[event['time']] = "%s%s%s%s%s%s%s" %(logprefix, clienthost, clientmac, ip, ssid, duration, totalbytes)
         elif event['key'] == "EVT_AP_Restarted":
-            ap_name = event['ap_name'] if (event.has_key('ap_name')) else '';
+            ap_name = event['ap_name'] if (event.has_key('ap_name')) else ''
             ap_mac = event['ap']
             admin = event['admin']
             message[event['time']] = "%sAP %s (%s) was restarted by %s" % (logprefix, ap_name, ap_mac, admin)
