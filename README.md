@@ -14,16 +14,19 @@ Fuer das Script `unifilog.py` muss ein CronJob eingerichtet werden, der alle n M
 
 ```
 python unifilog.py -h
-usage: unifilog.py [-h] [-c CONTROLLER] [-u USER] [-p PASSWORD] [-a]
+usage: unifilog.py [-h] [-c CONTROLLER] [-u USER] [-p PASSWORD] [-f FILE]
+                   [-t TIMESTAMP]
 
 optional arguments:
--h, --help            show this help message and exit
--c CONTROLLER, --controller CONTROLLER
-specifies host of the controller
--u USER, --user USER  specifies username for controller access
--p PASSWORD, --password PASSWORD
-specifies password for controller access
--a, --getall          fetches the complete event data from controller
+  -h, --help            show this help message and exit
+  -c CONTROLLER, --controller CONTROLLER
+                        host of the UniFi-controller (unifi)
+  -u USER, --user USER  username for controller access (ubnt)
+  -p PASSWORD, --password PASSWORD
+                        password for controller access (ubnt)
+  -f FILE, --file FILE  output file for log messages (unifi.log)
+  -t TIMESTAMP, --timestamp TIMESTAMP
+                        timestamp file (unifitimestamp.cfg)
 ```
 
 Das Script wird mit den oben genannten Argumenten gestartet.
@@ -32,24 +35,8 @@ Das Script wird mit den oben genannten Argumenten gestartet.
   * `-c` oder `--controller` zur Spezifikation des API Endpoints
   * `-u` oder `--user` zur Spezifikation des Nutzernamens des Unifi Servers
   * `-p` oder `--password` zur Spezifikation des Passwortes fuer den Unifi Server
-
-Als besonderes Attribut fuer den initialen Aufruf
-
-  * `-a` oder `--getall` zum sammeln aller auf dem Unifi Server verfuegbaren Events
-
-Das `-a` Attribut sollte nur bei erster Verwendung des Scripts genutzt werden. Sofern ein Aufruf im Nachhinein erfolgt, werden alle verfuegbaren Logdaten erneut in das Logfile geschrieben und somit doppelte Eintraege erzeugt.
-
-Wird initial auf das Aufrufen mit `-a` verzichtet, werden nur Daten der letzten 10 Minuten abgerufen und im Logfile gespeichert, auch wenn noch keines existiert.
-
-## Hinweise
-
-Das Script legt zwei Dateien mit seinem Aufruf an. Zum einen ist es eine `unifi.log` Datei, welche die eigentlichen Logdaten beinhaltet.
-Die zweite Datei ist `unifitimestamp.cfg`. Hier wird der Zeitstempel des letzten Scriptaufrufes gespeichert um sicherzustellen, dass alle ab diesem Zeitpunkt erzeugten Events erfasst werden.
-
-## TODO
-
-* Logdateipfad als Argument bei Scriptaufruf
-* Unifi Statistics mit `get_statistics_24h(self, endtime)`
+  * `-f` oder `--file` zur Spezifikation des Logfiles (Pfadangaben sind moeglich)
+  * `-t` oder `--timestamp` zur Spezifikation der Datei zum Speichern des letzten geloggten Zeitstempels.
 
 ## LICENSE
 
