@@ -135,9 +135,17 @@ if message:
 
 #
 # get some statistics...
-logprefix = "%s unifi" % (time.strftime("%b %d %H:%M:%S"))
-for stats in c.get_statistics_last1h(time.time()):
+logprefix = "%s %s " % (time.strftime("%b %d %H:%M:%S"), chost)
+for stats in c.get_statistics(time.time(), 3800):
     if stats.has_key('num_sta'):
-        logdata = "%s statistics: Stations_connected = %s, Traffic = %s, tx_Packets = %s, tx_Bytes = %s, tx_Errors = %s, tx_Retries= %s, rx_Packets = %s, rx_Bytes = %s, rx_Frags = %s" % (logprefix, stats['num_sta'], stats['bytes'], stats['tx_packets'], stats['tx_bytes'], stats['tx_errors'], stats['tx_retries'], stats['rx_packets'], stats['rx_bytes'], stats['rx_frags'])
+	Traff = stats['bytes'] if (stats.has_key('bytes')) else 0
+	tx_Pa = stats['tx_packets'] if (stats.has_key('tx_packets')) else 0
+        tx_By = stats['tx_bytes'] if (stats.has_key('tx_bytes')) else 0
+        tx_Er = stats['tx_errors'] if (stats.has_key('tx_errors')) else 0
+        tx_Re = stats['tx_retries'] if (stats.has_key('tx_retries')) else 0
+        rx_Pa = stats['rx_packets'] if (stats.has_key('rx_packets')) else 0
+        rx_By = stats['rx_bytes'] if (stats.has_key('rx_bytes')) else 0
+        rx_Fr = stats['rx_frags'] if (stats.has_key('rx_frags')) else 0
+        logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, tx_Packets = %s, tx_Bytes = %s, tx_Errors = %s, tx_Retries= %s, rx_Packets = %s, rx_Bytes = %s, rx_Frags = %s" % (logprefix, stats['num_sta'], Traff, tx_Pa, tx_By, tx_Er, tx_Re, rx_Pa, rx_By, rx_Fr)
         write_to_logfile(logdata)
 	break

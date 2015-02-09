@@ -152,11 +152,11 @@ class Controller:
         params = urllib.urlencode({'json': js})
         return self._read(self.api_url + 'stat/report/hourly.system', params)
 
-    def get_statistics_last1h(self, endtime):
-        """Return statistical data last 1h from time"""
+    def get_statistics(self, endtime, deltatime):
+        """Return statistical data from endtime-deltatime until endtime"""
 
         js = json.dumps(
-            {'start': int(endtime - 3600) * 1000, 'end': int(endtime) * 1000})
+            {'start': int(endtime - deltatime) * 1000, 'end': int(endtime) * 1000})
         params = urllib.urlencode({'json': js})
         return self._read(self.api_url + 'stat/report/hourly.system', params)
 
