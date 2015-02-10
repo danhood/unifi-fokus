@@ -73,6 +73,7 @@ for event in c.get_events():
     if (timestamp > storedtimestamp) or (storedtimestamp == 0):
         # Cheeck if event is not an AP Connect/Disconnect Event and collect
         # user data (AP Events don't have a user key in data.)
+        ip = ''
         if event.has_key('user'):
             for user in users:
                 if event['user'] == user['mac']:
@@ -81,7 +82,6 @@ for event in c.get_events():
                     else:
                         clienthost = ''
                     for client in clients:
-                        ip = ''
                         if event['user'] == client['mac']:
 
                             ip = "Client_IP = %s " % (client['ip']) if (client.has_key('ip')) else '';
