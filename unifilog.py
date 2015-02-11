@@ -58,12 +58,18 @@ def unixtimestamp_to_datetime(timestamp):
     mytime.replace(microsecond = (timestamp % 1000) * 1000)
     return mytime
 
-chost = args.controller
-c = Controller(chost, args.user, args.password)
+try:
+    chost = args.controller
+    c = Controller(chost, args.user, args.password)
+except:
+    logdata = "%s %s Connection error to host = %s, error = %s" % ((time.strftime("%b %d %H:%M:%S"), chost, chost, sys.exc_info()[0])
+    write_to_logfile(logdata)
+    break
+
+
 aps = c.get_aps()
 users = c.get_users()
 clients = c.get_clients()
-
 storedtimestamp = unixtimestamp_to_datetime(get_last_timestamp())
 message = {}
 for event in c.get_events():
