@@ -154,7 +154,7 @@ for event in c.get_events():
         elif event['key'] == "EVT_AP_Lost_Contact":
             ap_name = get_ap_hostname(event['ap'])
             ap_mac = event['ap']
-            message[event['time']] = "%sAP = %s (%s) was disconnected" % (logprefix, ap_name)
+            message[event['time']] = "%sAP = %s (%s) was disconnected" % (logprefix, ap_name, ap_mac)
         else:
             message[event['time']] = "%s MSG %s %s" % (logprefix, event['key'], event['msg'])
 
