@@ -59,11 +59,12 @@ def unixtimestamp_to_datetime(timestamp):
     mytime.replace(microsecond = (timestamp % 1000) * 1000)
     return mytime
 
+
 try:
     chost = args.controller
     c = Controller(chost, args.user, args.password)
 except Exception:
-    logdata = "%s %s Connection error to host = %s, error = %s" % ((time.strftime("%b %d %H:%M:%S"), chost, chost, sys.exc_info()[1])
+    logdata = "%s %s Connection error to host = %s, error = %s" % (time.strftime("%b %d %H:%M:%S"), chost, chost, sys.exc_info()[1])
     write_to_logfile(logdata)
     sys.exit()
 

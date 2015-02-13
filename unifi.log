@@ -1,0 +1,10 @@
+Feb 13 12:00:38 unifi.fokus.fraunhofer.de Connection error to host = unifi.fokus.fraunhofer.de, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:01:04 unifi.fokus.fraunhofer.de Connection error to host = unifi.fokus.fraunhofer.de, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:01:26 unifi.fokus.fraunhofer.de Connection error to host = unifi.fokus.fraunhofer.de, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:03:52 unifi Connection error to host = unifi, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:04:28 unifi Connection error to host = unifi, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:04:38 unifi Connection error to host = unifi, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:04:51 unifi.fokus.fraunhofer.de Connection error to host = unifi.fokus.fraunhofer.de, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:37:22 unifi.fokus.fraunhofer.de Connection error to host = unifi.fokus.fraunhofer.de, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:43:32 unifi.fokus.fraunhofer.de Connection error to host = unifi.fokus.fraunhofer.de, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
+Feb 13 12:50:36 unifi.fokus.fraunhofer.de Connection error to host = unifi.fokus.fraunhofer.de, error = <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:581)>
