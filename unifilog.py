@@ -5,6 +5,7 @@ import time
 import datetime
 import math
 import argparse
+import sys
 # import pytz
 
 # local_tz = pytz.timezone('Europe/Berlin')
@@ -61,13 +62,18 @@ def unixtimestamp_to_datetime(timestamp):
 try:
     chost = args.controller
     c = Controller(chost, args.user, args.password)
-except:
-    logdata = "%s %s Connection error to host = %s, error = %s" % ((time.strftime("%b %d %H:%M:%S"), chost, chost, sys.exc_info()[0])
+except Exception:
+    logdata = "%s %s Connection error to host = %s, error = %s" % ((time.strftime("%b %d %H:%M:%S"), chost, chost, sys.exc_info()[1])
     write_to_logfile(logdata)
-    break
+    sys.exit()
 
+try:
+    aps = c.get_aps()
+except Exception:
+    logdata = "%s %s Connection error to host = %s, error = %s" % (time.strftime("%b %d %H:%M:%S"), chost, chost, sys.exc_info()[1])
+    write_to_logfile(logdata)
+    sys.exit()
 
-aps = c.get_aps()
 users = c.get_users()
 clients = c.get_clients()
 storedtimestamp = unixtimestamp_to_datetime(get_last_timestamp())
@@ -106,11 +112,11 @@ for event in c.get_events():
             to_channel = "to_channel = %s" % (event['channel_to'])
             message[event['time']] = "%s%s%s%s%s%s%s" % (logprefix, clienthost, clientmac, ip, ap_name, from_channel, to_channel)
         elif event['key'] == "EVT_AP_Connected":
-            ap_name = event['ap_name']
+            ap_name = event['ap_name'] if (event.has_key('ap_name')) else ''
             ap_mac = event['ap']
             message[event['time']] = "%sAP %s (%s) was connected" % (logprefix, ap_name, ap_mac)
         elif event['key'] == "EVT_AP_Disconnected":
-            ap_name = event['ap_name']
+            ap_name = event['ap_name'] if (event.has_key('ap_name')) else ''
             ap_mac = event['ap']
             message[event['time']] = "%sAP %s (%s) was disconnected" % (logprefix, ap_name, ap_mac)
         elif event['key'] == "EVT_WU_Connected":
@@ -129,6 +135,26 @@ for event in c.get_events():
             ap_mac = event['ap']
             admin = event['admin']
             message[event['time']] = "%sAP %s (%s) was restarted by %s" % (logprefix, ap_name, ap_mac, admin)
+        elif event['key'] == "EVT_AP_Adopted":
+            ap_name = get_ap_hostname(event['ap'])
+            ap_mac = event['ap']
+            admin = event['admin']
+            message[event['time']] = "%sAdoption of AP = %s (%s) by %s" % (logprefix, ap_name, ap_mac, admin)
+        elif event['key'] == "EVT_AP_UpgradeScheduled":
+            ap_name = get_ap_hostname(event['ap'])
+            ap_mac = event['ap']
+            admin = event['admin']
+            message[event['time']] = "%sUpgrade of AP = %s (%s) was scheduled by %s" % (logprefix, ap_name, ap_mac, admin)
+        elif event['key'] == "EVT_AP_Upgraded":
+            ap_name = get_ap_hostname(event['ap'])
+            ap_mac = event['ap']
+            version_from = event['version_from']
+            version_to = event['version_to']
+            message[event['time']] = "%sAP = %s (%s) was upgraded from AP_old = %s to AP_new = %s" % (logprefix, ap_name, ap_mac, version_from, version_to)
+        elif event['key'] == "EVT_AP_Lost_Contact":
+            ap_name = get_ap_hostname(event['ap'])
+            ap_mac = event['ap']
+            message[event['time']] = "%sAP = %s (%s) was disconnected" % (logprefix, ap_name)
         else:
             message[event['time']] = "%s MSG %s %s" % (logprefix, event['key'], event['msg'])
 
