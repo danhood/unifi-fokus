@@ -181,6 +181,6 @@ for stats in c.get_statistics(time.time(), 3800):
         rx_Pa = stats['rx_packets'] if (stats.has_key('rx_packets')) else 0
         rx_By = stats['rx_bytes'] if (stats.has_key('rx_bytes')) else 0
         rx_Fr = stats['rx_frags'] if (stats.has_key('rx_frags')) else 0
-        logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, tx_Packets = %s, tx_Bytes = %s, tx_Errors = %s, tx_Retries= %s, rx_Packets = %s, rx_Bytes = %s, rx_Frags = %s" % (logprefix, stats['num_sta'], Traff, tx_Pa, tx_By, tx_Er, tx_Re, rx_Pa, rx_By, rx_Fr)
+        logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, tx_Packets = %s, tx_Bytes = %s, tx_Errors = %s, tx_Retries = %s, rx_Packets = %s, rx_Bytes = %s, rx_Frags = %s" % (logprefix, stats['num_sta'], Traff, tx_Pa, tx_By, tx_Er, tx_Re, rx_Pa, rx_By, rx_Fr)
         write_to_logfile(logdata)
 	break
