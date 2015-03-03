@@ -84,9 +84,10 @@ for event in c.get_events():
     timestamp = unixtimestamp_to_datetime(event['time'])
     logprefix = "%s %s " % (timestamp.strftime("%b %d %H:%M:%S"), chost)
     if (timestamp > storedtimestamp) or (storedtimestamp == 0):
-        # Cheeck if event is not an AP Connect/Disconnect Event and collect
+        # Check if event is not an AP Connect/Disconnect Event and collect
         # user data (AP Events don't have a user key in data.)
         ip = ''
+	clienthost=''
         if event.has_key('user'):
             for user in users:
                 if event['user'] == user['mac']:
