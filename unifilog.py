@@ -172,16 +172,23 @@ if message:
 #
 # get some statistics...
 logprefix = "%s %s " % (time.strftime("%b %d %H:%M:%S"), chost)
-for stats in c.get_statistics(time.time(), 3800):
+for stats in c.get_statistics(time.time(), 7400):
     if stats.has_key('num_sta'):
 	Traff = stats['bytes'] if (stats.has_key('bytes')) else 0
-	tx_Pa = stats['tx_packets'] if (stats.has_key('tx_packets')) else 0
-        tx_By = stats['tx_bytes'] if (stats.has_key('tx_bytes')) else 0
-        tx_Er = stats['tx_errors'] if (stats.has_key('tx_errors')) else 0
-        tx_Re = stats['tx_retries'] if (stats.has_key('tx_retries')) else 0
-        rx_Pa = stats['rx_packets'] if (stats.has_key('rx_packets')) else 0
-        rx_By = stats['rx_bytes'] if (stats.has_key('rx_bytes')) else 0
-        rx_Fr = stats['rx_frags'] if (stats.has_key('rx_frags')) else 0
-        logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, tx_Packets = %s, tx_Bytes = %s, tx_Errors = %s, tx_Retries = %s, rx_Packets = %s, rx_Bytes = %s, rx_Frags = %s" % (logprefix, stats['num_sta'], Traff, tx_Pa, tx_By, tx_Er, tx_Re, rx_Pa, rx_By, rx_Fr)
-        write_to_logfile(logdata)
-	break
+	#not in 4.x#tx_Pa = stats['tx_packets'] if (stats.has_key('tx_packets')) else 0
+        #not in 4.x#tx_By = stats['tx_bytes'] if (stats.has_key('tx_bytes')) else 0
+        #not in 4.x#tx_Er = stats['tx_errors'] if (stats.has_key('tx_errors')) else 0
+        #not in 4.x#tx_Re = stats['tx_retries'] if (stats.has_key('tx_retries')) else 0
+        #not in 4.x#rx_Pa = stats['rx_packets'] if (stats.has_key('rx_packets')) else 0
+        #not in 4.x#rx_By = stats['rx_bytes'] if (stats.has_key('rx_bytes')) else 0
+        #not in 4.x#rx_Fr = stats['rx_frags'] if (stats.has_key('rx_frags')) else 0
+
+	# get APs connected/disconnected from healh status, new in 4.x
+	for hea in c.get_health():
+            ap_act = hea['num_ap'] if (hea.has_key('num_ap')) else 0
+	    ap_disc = hea['num_disconnected'] if (hea.has_key('num_disconnected')) else 0
+	    ap_users = hea['num_user'] if (hea.has_key('num_user')) else 0
+            #3.x-version#logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, tx_Packets = %s, tx_Bytes = %s, tx_Errors = %s, tx_Retries = %s, rx_Packets = %s, rx_Bytes = %s, rx_Frags = %s, h_APs = %s, h_APdisc = %s, h_Users = %s" % (logprefix, stats['num_sta'], Traff, tx_Pa, tx_By, tx_Er, tx_Re, rx_Pa, rx_By, rx_Fr, ap_act, ap_disc, ap_users)
+            logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, APs_act = %s, APs_disc = %s, AP_Clients = %s" % (logprefix, stats['num_sta'], Traff, ap_act, ap_disc, ap_users)
+            write_to_logfile(logdata)
+	    break
