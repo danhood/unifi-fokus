@@ -67,7 +67,7 @@ class Controller:
             username -- the username to log in with
             password -- the password to log in with
             port     -- the port of the controller host
-            version  -- the base version of the controller API [v2|v3|v4]
+            version  -- the base version of the controller API [v2|v3|v4|v5]
             site_id  -- the site ID to connect to (UniFi >= 3.x)
 
         """
@@ -133,12 +133,8 @@ class Controller:
 
         if(version == 'v2'):
             return V2_PATH
-        if(version == 'v3'):
-            return V3_PATH
-        if(version == 'v4'):
-            return V3_PATH
         else:
-            return V2_PATH
+            return V3_PATH
 
     def _login(self, version):
         log.debug('login() as %s', self.username)
@@ -146,7 +142,7 @@ class Controller:
         params = {'username': self.username, 'password': self.password}
         login_url = self.url
 
-        if version == 'v4':
+        if version == 'v4' or version == 'v5':
             login_url += 'api/login'
             params = json.dumps(params)
         else:
@@ -196,7 +192,7 @@ class Controller:
         """Return statistical data from endtime-deltatime until endtime"""
 
         js = json.dumps(
-            {'attrs': ["time","bytes","num_sta"], 'start': int(endtime - deltatime) * 1000, 'end': int(endtime) * 1000})
+            {'attrs': ["time","bytes","num_sta","wlan_bytes"], 'start': int(endtime - deltatime) * 1000, 'end': int(endtime) * 1000})
 	params = urllib.urlencode({'json': js})
         return self._read(self.api_url + 'stat/report/hourly.site', params)
 

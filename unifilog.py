@@ -174,7 +174,8 @@ if message:
 logprefix = "%s %s " % (time.strftime("%b %d %H:%M:%S"), chost)
 for stats in c.get_statistics(time.time(), 7400):
     if stats.has_key('num_sta'):
-	Traff = stats['bytes'] if (stats.has_key('bytes')) else 0
+	#not in 4.x,5.x#Traff = stats['bytes'] if (stats.has_key('bytes')) else 0
+	Traff = stats['wlan_bytes'] if (stats.has_key('wlan_bytes')) else 0
 	#not in 4.x#tx_Pa = stats['tx_packets'] if (stats.has_key('tx_packets')) else 0
         #not in 4.x#tx_By = stats['tx_bytes'] if (stats.has_key('tx_bytes')) else 0
         #not in 4.x#tx_Er = stats['tx_errors'] if (stats.has_key('tx_errors')) else 0
@@ -188,7 +189,12 @@ for stats in c.get_statistics(time.time(), 7400):
             ap_act = hea['num_ap'] if (hea.has_key('num_ap')) else 0
 	    ap_disc = hea['num_disconnected'] if (hea.has_key('num_disconnected')) else 0
 	    ap_users = hea['num_user'] if (hea.has_key('num_user')) else 0
+	    # new in 4.x, 5.x:
+	    tx_By = hea['tx_bytes-r'] if (hea.has_key('tx_bytes-r')) else 0
+	    rx_By = hea['rx_bytes-r'] if (hea.has_key('rx_bytes-r')) else 0
             #3.x-version#logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, tx_Packets = %s, tx_Bytes = %s, tx_Errors = %s, tx_Retries = %s, rx_Packets = %s, rx_Bytes = %s, rx_Frags = %s, h_APs = %s, h_APdisc = %s, h_Users = %s" % (logprefix, stats['num_sta'], Traff, tx_Pa, tx_By, tx_Er, tx_Re, rx_Pa, rx_By, rx_Fr, ap_act, ap_disc, ap_users)
-            logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, APs_act = %s, APs_disc = %s, AP_Clients = %s" % (logprefix, stats['num_sta'], Traff, ap_act, ap_disc, ap_users)
+            logdata = "%sstatistics: Stations_connected = %s, Traffic = %s, tx_Bytes = %s, rx_Bytes = %s, APs_act = %s, APs_disc = %s, AP_Clients = %s" % (logprefix, stats['num_sta'], Traff, tx_By, rx_By, ap_act, ap_disc, ap_users)
             write_to_logfile(logdata)
 	    break
+
+    break
